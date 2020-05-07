@@ -4,6 +4,23 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
+var db = require('./routes/db')
+
+// Connection URL
+const url = 'mongodb://localhost:27017';
+
+// Database Name
+const dbName = 'BlogServer';
+
+// Connect to Mongo on start
+db.connect(url, dbName, function(err) {
+  if (err) {
+    console.log('Unable to connect to MongoDB');
+    process.exit(1);
+  }
+  console.log('Connected to MongoDB');
+});
+
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var blogRouter = require('./routes/blog');

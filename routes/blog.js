@@ -1,13 +1,18 @@
 var express = require('express');
 var router = express.Router();
 
-function blog_post(eq, res, next) {
+var db = require('./db');
 
-    res.render('blog_post', { title: title, body: body })
+function blog_post(req, res, next) {
+    var collection = db.get().collection('Posts')
+
+    collection.find({postid: 1}).toArray(function(err, docs) {
+        res.render('blog_post', { title: docs[0]['title'], body: docs[0]['body'] });
+      });
 }
 
-function multiple_posts(eq, res, next) {
-    res.render('blog_post', { title: 'username', body: 'no postid' })
+function multiple_posts(req, res, next) {
+    res.render('blog_post', { title: 'username', body: 'no postid' });
 }
 /* GET home page. */
 router.get('/:username/:postid', blog_post);
