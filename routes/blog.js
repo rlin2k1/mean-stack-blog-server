@@ -91,6 +91,9 @@ function multiple_posts(req, res, next) {
         collection.find({username: req.params.username, postid:{$gte: Number(req.query.start)} }).sort({postid: 1}).limit( 5 ).toArray()
         .then ( (result) => {
             // No posts could be available -> we are passing in an empty Array
+            if (result.length == 0) {
+                throw new Error('Username does not exist in the database or Postid not found.');
+            }
             clean(result)
 
             let next = 0;
@@ -119,7 +122,7 @@ function multiple_posts(req, res, next) {
         })
         .catch((err) => {
             // set locals, only providing error in development
-            res.locals.message = "Username does not exist in the database."
+            res.locals.message = err.message;
             res.locals.error = req.app.get('env') === 'development' ? err : {};
     
             // render the error page
