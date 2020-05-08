@@ -46,7 +46,7 @@ function multiple_posts(req, res, next) {
         collection.find({username: req.params.username, postid:{$gte: 1} }).sort({postid: 1}).limit( 5 ).toArray()
         .then ( (result) => {
             // No posts could be available -> we are passing in an empty Array
-            if (result.length == 0) {
+            if (result.length == 0) { //TODO: IF user exists, we do not throw an error. We need to return 200 with an empty HTML.
                 throw new Error('Username does not exist in the database.');
             }
             clean(result)
