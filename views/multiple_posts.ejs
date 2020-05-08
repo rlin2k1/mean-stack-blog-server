@@ -5,7 +5,14 @@
     <link rel='stylesheet' href='/stylesheets/style.css' />
   </head>
   <body>
-    <h1 id="title"><%= title %></h1>
-    <div id="body"><%= body %></div>
+    <%  posts.forEach(function(post) { %>
+      <h1 id="title"><%- post.title %></h1>
+      <div id= "date">Created: <%= post.created %> | Modified: <%= post.modified %></div>
+      <div id="body"><%- post.body %></div>
+    <% }); %>
+
+    <%  if (next != 0) { %>
+      <a id="next" href="/blog/<%= username %>?start=<%= next %>">NEXT PAGE</a>
+    <% } %>
   </body>
 </html>
