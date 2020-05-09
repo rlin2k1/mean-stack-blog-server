@@ -48,6 +48,35 @@ function multiple_posts(req, res) {
         if (!result) {
             throw new "User does not exist in the database.";
         }
+
+        let next = 0;
+        let maxPosts = 5;
+        const {start = 0} = req.query;
+
+        blog.multiple_posts(username, start)
+        .then ( (result) => {
+            clean(result)
+
+            if (result.length == maxPosts) { // Need pagination! Set to the next id
+                let greatestPostid = result[result.length - 1].postid;
+
+                blog.counter(username, greatestPostid)
+                .then ( (count) => {
+                    if (count > 0) {
+                        next = greatestPostid + 1;
+                    }
+                    res.render('multiple_posts', { username: username, posts: result, next: next});
+                })
+                .catch((err) => {
+                    throw new Error ("Database counter error.");
+                });
+            } else {
+                res.render('multiple_posts', { username: username, posts: result, next: next});
+            }
+        })
+        .catch( (err) => {
+            throw new Error (err.message);
+        });
     })
     .catch((err) => {
         res.locals.message = err.message;
@@ -55,38 +84,9 @@ function multiple_posts(req, res) {
 
         res.status(err.status || 404);
         res.render('error');
-    });
+        return;
+    }); // Problem: Asynchronous!
 
-    let next = 0;
-    let maxPosts = 5;
-    const {start = 0} = req.query;
-
-    blog.multiple_posts(username, start)
-    .then ( (result) => {
-        clean(result)
-
-        if (result.length == maxPosts) { // Need pagination! Set to the next id
-            let greatestPostid = result[result.length - 1].postid;
-
-            blog.counter(username, greatestPostid)
-            .then ( (count) => {
-                if (count > 0) {
-                    next = greatestPostid + 1;
-                }
-            })
-            .catch((err) => {
-                throw new Error ("Database counter error.");
-            });
-        }
-        res.render('multiple_posts', { username: username, posts: result, next: next});
-    })
-    .catch((err) => {
-        res.locals.message = err.message;
-        res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-        res.status(err.status || 404);
-        res.render('error');
-    });
 }
 
 module.exports = router;

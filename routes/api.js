@@ -14,7 +14,7 @@ router.delete('/:username/:postid', delete_post);
 
 function verify(token, username) {
     if (token) {
-        let decoded = jwt.verify(token, key.tokenKey);
+        let decoded = jwt.verify(token, key.tokenKey); // Also checks for expiration date
         if (decoded.usr != username) {
             throw new Error("Invalid username or password");
         }
@@ -50,6 +50,9 @@ function get_one(req, res) {
     
     api.get_one(username, postid)
     .then( (result) => {
+        if (!result) {
+            throw new Error("Username / postid combination does not exist.")
+        }
         res.json(result);
     })
     .catch((err) => {

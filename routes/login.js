@@ -12,17 +12,20 @@ router.post('/', post_login);
 
 function get_login(req, res) { // GET login
     const {redirect} = req.query;
-    res.render('login', {redirect: redirect});
+    let username = "";
+    let password = "";
+
+    res.render('login', {redirect: redirect, username: username, password: password});
 }
 
 function post_login(req, res) { // POST login
-    const {username, redirect} = req.body;
+    const {username, password, redirect} = req.body;
 
     login.authenticate(username)
     .then( (result) => {
         let password_hash = result.password;
         
-        if(bcrypt.compareSync(req.body.password, password_hash)) { // Provided username and password match our record
+        if(bcrypt.compareSync(password, password_hash)) { // Provided username and password match our record
             // Set an authentication session cookie in JWT
             let two_hours_sec = (60 * 60) * 2;
             let current_time_sec = Date.now() / 1000;
@@ -40,7 +43,7 @@ function post_login(req, res) { // POST login
     })
     .catch((err) => { // Database error
         res.status(401);
-        res.render('login', {redirect: redirect});
+        res.render('login', {redirect: redirect, username: username, password: password});
     });
 }
 
