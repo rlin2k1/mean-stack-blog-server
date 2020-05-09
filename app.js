@@ -1,30 +1,26 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
+let createError = require('http-errors');
+let express = require('express');
+let path = require('path');
+let cookieParser = require('cookie-parser');
+let logger = require('morgan');
 // -------------------------------------------------------------------------- //
 // Database Initialization
 // -------------------------------------------------------------------------- //
 let client = require('./models/db');
 
-// Connect to Mongo on start
+// Connect to MongoDB on start
 client.connect('mongodb://localhost:27017/', function (err) {
     if (err) {
         console.log('Unable to connect to Mongo.');
         process.exit(1);
     }
 });
+//------------------------------------------------------------------------------
+let blogRouter = require('./routes/blog');
+let loginRouter = require('./routes/login');
+let apiRouter = require('./routes/api');
 
-let bodyParser = require('body-parser');
-
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
-var blogRouter = require('./routes/blog');
-var loginRouter = require('./routes/login');
-var apiRouter = require('./routes/api');
-
-var app = express();
+let app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -36,11 +32,6 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use(bodyParser.json()); // support json encoded bodies
-app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
-
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
 app.use('/blog', blogRouter);
 app.use('/login', loginRouter);
 app.use('/api', apiRouter);

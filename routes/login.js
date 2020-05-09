@@ -1,22 +1,22 @@
-var express = require('express');
-var router = express.Router();
+let express = require('express');
+let router = express.Router();
+
+let bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const key = require('./key');
 
 let login = require('../models/login');
-var key = require('./key');
 
-var bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+router.get('/', get_login);
+router.post('/', post_login);
 
-/* GET home page. */
-router.get('/', function(req, res) { // /login
-    redirect = req.query.redirect
+function get_login(req, res) { // GET login
+    const {redirect} = req.query;
     res.render('login', {redirect: redirect});
-  });
+}
 
-/* GET home page. */
-router.post('/', function(req, res) { // /login
-    let username = req.body.username;
-    let redirect = req.body.redirect;
+function post_login(req, res) { // POST login
+    const {username, redirect} = req.body;
 
     login.authenticate(username)
     .then( (result) => {
@@ -27,21 +27,21 @@ router.post('/', function(req, res) { // /login
             let two_hours_sec = (60 * 60) * 2;
             let current_time_sec = Date.now() / 1000;
             let token = jwt.sign({ "exp": current_time_sec + two_hours_sec, "usr":username }, key.tokenKey, { algorithm: 'HS256'});
+
             res.cookie('jwt',token, { httpOnly: true });
-            if (redirect) { // redirect if it was provided in the request
+            if (redirect) { // Redirect if it was provided in the request
                 res.redirect(redirect);
             } else {
                 res.send('Authentication was successful.'); // Return status code "200(OK)" with the body saying that the authentication was successful
             }
-        } else {
-            res.status(401);
-            res.render('login', {redirect: redirect});
+        } else { // Provided username and password did not match our record
+            throw new Error("Incorrect username or password.");
         }
     })
-    .catch((err) => {
+    .catch((err) => { // Database error
         res.status(401);
         res.render('login', {redirect: redirect});
     });
-  });
+}
 
 module.exports = router;

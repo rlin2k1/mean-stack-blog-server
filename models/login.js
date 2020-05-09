@@ -2,7 +2,7 @@ let client = require('./db');
 
 // Database Name
 const dbName = 'BlogServer';
-const usersCollection = 'Users'
+const usersCollection = 'Users';
 
 module.exports.authenticate = function (username) {
     let collection = client.db(dbName).collection(usersCollection);
