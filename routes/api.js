@@ -1,7 +1,6 @@
 var express = require('express');
 var router = express.Router();
 
-let client = require('../models/db');
 var key = require('./key');
 
 const jwt = require('jsonwebtoken');
@@ -66,7 +65,7 @@ function get_one(req, res) {
         res.locals.error = req.app.get('env') === 'development' ? err : {};
 
         // render the error page
-        res.status(err.status || 401);
+        res.status(err.status || 404);
         res.render('error');
     });
 }
@@ -93,7 +92,10 @@ function insert_post(req, res) {
         throw new Error("Unauthorized Cookie");
     }
     if (!title || ! body) {
-        throw new Error("Needs title and body params in body json");
+       // render the error page
+       res.status(400);
+       res.send('Title and body needed');
+       return
     }
 
     api.insert(username, postid, current_time_ms, title, body)
@@ -137,8 +139,10 @@ function update_post(req, res) {
         throw new Error("Unauthorized Cookie");
     }
     if (!title || ! body) {
-        err.status = 400;
-        throw new Error("Needs title and body params in body json");
+       // render the error page
+       res.status(400);
+       res.send('Title and body needed');
+       return
     }
 
     api.update(username, postid, current_time_ms, title, body)

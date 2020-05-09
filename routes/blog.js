@@ -5,7 +5,6 @@ var commonmark = require('commonmark');
 var reader = new commonmark.Parser();
 var writer = new commonmark.HtmlRenderer();
 
-let client = require('../models/db');
 let blog = require('../models/blog');
 
 function blog_post(req, res) {

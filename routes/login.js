@@ -29,7 +29,7 @@ router.post('/', function(req, res) { // /login
             let token = jwt.sign({ "exp": current_time_sec + two_hours_sec, "usr":username }, key.tokenKey, { algorithm: 'HS256'});
             res.cookie('jwt',token, { httpOnly: true });
             if (redirect) { // redirect if it was provided in the request
-                res.send('Redirection successful.');
+                res.redirect(redirect);
             } else {
                 res.send('Authentication was successful.'); // Return status code "200(OK)" with the body saying that the authentication was successful
             }
