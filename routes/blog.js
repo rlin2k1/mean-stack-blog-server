@@ -5,12 +5,14 @@ var commonmark = require('commonmark');
 var reader = new commonmark.Parser();
 var writer = new commonmark.HtmlRenderer();
 
-var db = require('./db');
+let client = require('../models/db');
+let blog = require('../models/blog');
 
-function blog_post(req, res, next) {
-    let collection = db.get().collection('Posts')
+function blog_post(req, res) {
+    let username = req.params.username;
+    let postid = Number(req.params.postid);
 
-    collection.findOne({username: req.params.username, postid: Number(req.params.postid)})
+    blog.blog_post(username, postid)
     .then( (result) => {
         let title = writer.render(reader.parse(result.title));
         let body = writer.render(reader.parse(result.body));
@@ -38,12 +40,12 @@ function clean(result) {
     });
 }
 
-function multiple_posts(req, res, next) {
-    let collection = db.get().collection('Posts')
+function multiple_posts(req, res) {
+    let username = req.params.username;
 
     if (!req.query.start) {
         // The first five blog posts!
-        collection.find({username: req.params.username, postid:{$gte: 1} }).sort({postid: 1}).limit( 5 ).toArray()
+        blog.multiple_posts(username)
         .then ( (result) => {
             // No posts could be available -> we are passing in an empty Array
             if (result.length == 0) { //TODO: IF user exists, we do not throw an error. We need to return 200 with an empty HTML.
@@ -55,7 +57,7 @@ function multiple_posts(req, res, next) {
             if (result.length == 5) { // Need pagination! to set next to the next id.
                 let greatest_postid = result[result.length - 1].postid;
 
-                collection.count({username: req.params.username, postid:{$gt: greatest_postid}})
+                blog.counter(username, greatest_postid)
                 .then ( (count) => {
                     if (count > 0) {
                         next = greatest_postid + 1;
@@ -88,7 +90,7 @@ function multiple_posts(req, res, next) {
     else {
         // First five blog posts buy the start param
         // The first five blog posts!
-        collection.find({username: req.params.username, postid:{$gte: Number(req.query.start)} }).sort({postid: 1}).limit( 5 ).toArray()
+        blog.multiple_posts(username, Number(req.query.start))
         .then ( (result) => {
             // No posts could be available -> we are passing in an empty Array
             if (result.length == 0) {
@@ -100,7 +102,7 @@ function multiple_posts(req, res, next) {
             if (result.length == 5) { // Need pagination! to set next to the next id.
                 let greatest_postid = result[result.length - 1].postid;
 
-                collection.count({username: req.params.username, postid:{$gt: greatest_postid}})
+                blog.counter(username, greatest_postid)
                 .then ( (count) => {
                     if (count > 0) {
                         next = greatest_postid + 1;

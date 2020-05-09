@@ -1,25 +1,24 @@
 var express = require('express');
 var router = express.Router();
 
-var db = require('./db');
+let login = require('../models/login');
 var key = require('./key');
 
 var bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 /* GET home page. */
-router.get('/', function(req, res, next) { // /login
+router.get('/', function(req, res) { // /login
     redirect = req.query.redirect
     res.render('login', {redirect: redirect});
   });
 
 /* GET home page. */
-router.post('/', function(req, res, next) { // /login
-    let collection = db.get().collection('Users');
+router.post('/', function(req, res) { // /login
     let username = req.body.username;
     let redirect = req.body.redirect;
 
-    collection.findOne({username: username})
+    login.authenticate(username)
     .then( (result) => {
         let password_hash = result.password;
         

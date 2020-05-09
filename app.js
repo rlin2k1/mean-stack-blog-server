@@ -3,22 +3,17 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-
-var db = require('./routes/db')
-
-// Connection URL
-const url = 'mongodb://localhost:27017';
-
-// Database Name
-const dbName = 'BlogServer';
+// -------------------------------------------------------------------------- //
+// Database Initialization
+// -------------------------------------------------------------------------- //
+let client = require('./models/db');
 
 // Connect to Mongo on start
-db.connect(url, dbName, function(err) {
-  if (err) {
-    console.log('Unable to connect to MongoDB');
-    process.exit(1);
-  }
-  console.log('Connected to MongoDB');
+client.connect('mongodb://localhost:27017/', function (err) {
+    if (err) {
+        console.log('Unable to connect to Mongo.');
+        process.exit(1);
+    }
 });
 
 let bodyParser = require('body-parser');

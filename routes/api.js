@@ -1,16 +1,16 @@
 var express = require('express');
 var router = express.Router();
 
-var db = require('./db');
+let client = require('../models/db');
 var key = require('./key');
 
 const jwt = require('jsonwebtoken');
+let api = require('../models/api');
 
-function get_all_posts(req, res, next) {
-    let collection = db.get().collection('Posts');
+function get_all(req, res) {
     let username = req.params.username;
 
-    collection.find({username: username}).toArray()
+    api.get_all(username)
     .then( (result) => {
         try {
             let token = req.cookies.jwt;
@@ -37,11 +37,11 @@ function get_all_posts(req, res, next) {
     });
 }
 
-function get_one_post(req, res, next) {
-    let collection = db.get().collection('Posts');
+function get_one(req, res) {
     let username = req.params.username;
     let postid = req.params.postid;
-    collection.findOne({username: username, postid: Number(postid)})
+    
+    api.get_one(username, postid)
     .then( (result) => {
         if (! result) {
             throw new Error("Username / PostID not in database.")
@@ -71,8 +71,7 @@ function get_one_post(req, res, next) {
     });
 }
 
-function insert_post(req, res, next) {
-    let collection = db.get().collection('Posts');
+function insert_post(req, res) {
     let username = req.params.username;
     let postid = req.params.postid;
 
@@ -97,7 +96,7 @@ function insert_post(req, res, next) {
         throw new Error("Needs title and body params in body json");
     }
 
-    collection.update({username: username, postid: Number(postid)}, { $setOnInsert: {postid: Number(postid), username: username, created: current_time_ms, modified: current_time_ms, title: title, body: body} }, { upsert: true })
+    api.insert(username, postid, current_time_ms, title, body)
     .then( (result) => {
         if (!result.result.upserted) {
             throw new Error("Could not update")
@@ -116,8 +115,7 @@ function insert_post(req, res, next) {
     });
 }
 
-function update_post(req, res, next) {
-    let collection = db.get().collection('Posts');
+function update_post(req, res) {
     let username = req.params.username;
     let postid = req.params.postid;
 
@@ -143,7 +141,7 @@ function update_post(req, res, next) {
         throw new Error("Needs title and body params in body json");
     }
 
-    collection.updateOne({username: username, postid: Number(postid)}, {$set: {postid: Number(postid), username: username, modified: current_time_ms, title: title, body: body}})
+    api.update(username, postid, current_time_ms, title, body)
     .then( (result) => {
         console.log(result);
         if (result.result.nModified != 1) {
@@ -163,8 +161,7 @@ function update_post(req, res, next) {
     });
 }
 
-function delete_post(req, res, next) {
-    let collection = db.get().collection('Posts');
+function delete_post(req, res) {
     let username = req.params.username;
     let postid = req.params.postid;
 
@@ -182,7 +179,7 @@ function delete_post(req, res, next) {
         throw new Error("Unauthorized Cookie");
     }
 
-    collection.deleteOne({username: username, postid: Number(postid)})
+    api.delete(username, postid)
     .then( (result) => {
         console.log(result);
         if (result.deletedCount != 1) {
@@ -202,10 +199,10 @@ function delete_post(req, res, next) {
     });
 }
 
-router.get('/:username/:postid', get_one_post);
+router.get('/:username/:postid', get_one);
 
 /* GET home page. */
-router.get('/:username', get_all_posts);
+router.get('/:username', get_all);
 
 router.post('/:username/:postid', insert_post);
 
