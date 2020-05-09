@@ -9,21 +9,27 @@ let api = require('../models/api');
 function get_all(req, res) {
     let username = req.params.username;
 
-    api.get_all(username)
-    .then( (result) => {
-        try {
-            let token = req.cookies.jwt;
-            if(token) {
-                let decoded = jwt.verify(token, key.tokenKey);
-                if (decoded.usr == username) {
-                    res.json(result);
-                } else {
-                    throw new Error("Unauthorized Username");
-                }
+    try {
+        let token = req.cookies.jwt;
+
+        if(token) {
+            let decoded = jwt.verify(token, key.tokenKey);
+
+            if (decoded.usr != username){
+                throw new Error("Unauthorized Username");
             }
-        } catch (err) {
+        } else {
             throw new Error("Unauthorized Cookie");
         }
+    } catch (err) {
+        res.status(401);
+        res.send("Unauthorized Cookie");
+        return
+    }
+
+    api.get_all(username)
+    .then( (result) => {
+        res.json(result);
     })
     .catch((err) => {
         // set locals, only providing error in development
@@ -39,25 +45,30 @@ function get_all(req, res) {
 function get_one(req, res) {
     let username = req.params.username;
     let postid = req.params.postid;
+    try {
+        let token = req.cookies.jwt;
+
+        if(token) {
+            let decoded = jwt.verify(token, key.tokenKey);
+
+            if (decoded.usr != username){
+                throw new Error("Unauthorized Username");
+            }
+        } else {
+            throw new Error("Unauthorized Cookie");
+        }
+    } catch (err) {
+        res.status(401);
+        res.send("Unauthorized Cookie");
+        return
+    }
     
     api.get_one(username, postid)
     .then( (result) => {
         if (! result) {
             throw new Error("Username / PostID not in database.")
         }
-        try {
-            let token = req.cookies.jwt;
-            if(token) {
-                let decoded = jwt.verify(token, key.tokenKey);
-                if (decoded.usr == username) {
-                    res.json(result);
-                } else {
-                    throw new Error("Unauthorized Username");
-                }
-            }
-        } catch (err) {
-            throw new Error("Unauthorized Cookie");
-        }
+        res.json(result);
     })
     .catch((err) => {
         // set locals, only providing error in development
@@ -87,9 +98,13 @@ function insert_post(req, res) {
             if (decoded.usr != username){
                 throw new Error("Unauthorized Username");
             }
+        } else {
+            throw new Error("Unauthorized Cookie");
         }
     } catch (err) {
-        throw new Error("Unauthorized Cookie");
+        res.status(401);
+        res.send("Unauthorized Cookie");
+        return
     }
     if (!title || ! body) {
        // render the error page
@@ -134,9 +149,13 @@ function update_post(req, res) {
             if (decoded.usr != username){
                 throw new Error("Unauthorized Username");
             }
+        } else {
+            throw new Error("Unauthorized Cookie");
         }
     } catch (err) {
-        throw new Error("Unauthorized Cookie");
+        res.status(401);
+        res.send("Unauthorized Cookie");
+        return
     }
     if (!title || ! body) {
        // render the error page
@@ -150,7 +169,7 @@ function update_post(req, res) {
         if (result.result.nModified != 1) {
             throw new Error("Could not update")
         }
-        res.status(201);
+        res.status(200);
         res.send("Update Successful.")
     })
     .catch((err) => {
@@ -177,9 +196,13 @@ function delete_post(req, res) {
             if (decoded.usr != username){
                 throw new Error("Unauthorized Username");
             }
+        } else {
+            throw new Error("Unauthorized Cookie");
         }
     } catch (err) {
-        throw new Error("Unauthorized Cookie");
+        res.status(401);
+        res.send("Unauthorized Cookie");
+        return
     }
 
     api.delete(username, postid)
