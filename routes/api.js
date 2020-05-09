@@ -86,16 +86,13 @@ function insert_post(req, res, next) {
         if(token) {
             let decoded = jwt.verify(token, key.tokenKey);
 
-            if (decoded.usr != username)
+            if (decoded.usr != username){
                 throw new Error("Unauthorized Username");
             }
         }
     } catch (err) {
         throw new Error("Unauthorized Cookie");
     }
-    console.log(req.body)
-    console.log(body);
-    console.log(title);
     if (!title || ! body) {
         throw new Error("Needs title and body params in body json");
     }
@@ -125,5 +122,7 @@ router.get('/:username/:postid', get_one_post);
 router.get('/:username', get_all_posts);
 
 router.post('/:username/:postid', insert_post);
+
+router.get('/:username/:postid', update_post);
 
 module.exports = router;
