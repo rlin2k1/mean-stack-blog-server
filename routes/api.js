@@ -139,6 +139,7 @@ function update_post(req, res, next) {
         throw new Error("Unauthorized Cookie");
     }
     if (!title || ! body) {
+        err.status = 400;
         throw new Error("Needs title and body params in body json");
     }
 
@@ -149,7 +150,46 @@ function update_post(req, res, next) {
             throw new Error("Could not update")
         }
         res.status(201);
-        res.send("Insert Successful.")
+        res.send("Update Successful.")
+    })
+    .catch((err) => {
+        // set locals, only providing error in development
+        res.locals.message = "Unauthorized"
+        res.locals.error = req.app.get('env') === 'development' ? err : {};
+
+        // render the error page
+        res.status(err.status || 400);
+        res.render('error');
+    });
+}
+
+function delete_post(req, res, next) {
+    let collection = db.get().collection('Posts');
+    let username = req.params.username;
+    let postid = req.params.postid;
+
+    try {
+        let token = req.cookies.jwt;
+
+        if(token) {
+            let decoded = jwt.verify(token, key.tokenKey);
+
+            if (decoded.usr != username){
+                throw new Error("Unauthorized Username");
+            }
+        }
+    } catch (err) {
+        throw new Error("Unauthorized Cookie");
+    }
+
+    collection.deleteOne({username: username, postid: Number(postid)})
+    .then( (result) => {
+        console.log(result);
+        if (result.deletedCount != 1) {
+            throw new Error("Could not delete")
+        }
+        res.status(204);
+        res.send("Deletion Successful.");
     })
     .catch((err) => {
         // set locals, only providing error in development
@@ -170,5 +210,7 @@ router.get('/:username', get_all_posts);
 router.post('/:username/:postid', insert_post);
 
 router.put('/:username/:postid', update_post);
+
+router.delete('/:username/:postid', delete_post);
 
 module.exports = router;
