@@ -147,7 +147,6 @@ function update_post(req, res) {
 
     api.update(username, postid, current_time_ms, title, body)
     .then( (result) => {
-        console.log(result);
         if (result.result.nModified != 1) {
             throw new Error("Could not update")
         }
@@ -185,7 +184,6 @@ function delete_post(req, res) {
 
     api.delete(username, postid)
     .then( (result) => {
-        console.log(result);
         if (result.deletedCount != 1) {
             throw new Error("Could not delete")
         }
