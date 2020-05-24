@@ -31,7 +31,7 @@ function post_login(req, res) { // POST login
             let current_time_sec = Date.now() / 1000;
             let token = jwt.sign({ "exp": current_time_sec + two_hours_sec, "usr":username }, key.tokenKey, { algorithm: 'HS256'});
 
-            res.cookie('jwt',token, { httpOnly: true });
+            res.cookie('jwt',token);
             if (redirect) { // Redirect if it was provided in the request
                 res.redirect(redirect);
             } else {
