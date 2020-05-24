@@ -73,7 +73,7 @@ function insert_post(req, res) {
     const {title, body} = req.body;
     let current_time_ms = Date.now();
     
-    if (!title || ! body) {
+    if (title === undefined || body === undefined) {
        res.status(400);
        res.send('Both title and body needed in request.');
        return
@@ -105,7 +105,7 @@ function update_post(req, res) {
     const {title, body} = req.body;
     let current_time_ms = Date.now();
 
-    if (!title || ! body) {
+    if (title === undefined || body === undefined) {
         res.status(400);
         res.send('Both title and body needed in request.');
         return
