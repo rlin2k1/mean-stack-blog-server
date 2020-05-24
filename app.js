@@ -19,6 +19,7 @@ client.connect('mongodb://localhost:27017/', function (err) {
 let blogRouter = require('./routes/blog');
 let loginRouter = require('./routes/login');
 let apiRouter = require('./routes/api');
+var editorRouter = require('./routes/editor');
 
 let app = express();
 
@@ -30,11 +31,13 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/blog', blogRouter);
 app.use('/login', loginRouter);
 app.use('/api', apiRouter);
+app.use('/editor', editorRouter);
+
+app.use(express.static(path.join(__dirname, 'public')));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
